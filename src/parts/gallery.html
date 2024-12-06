@@ -1,0 +1,85 @@
+<div x-data="Gallery()" x-init="init()" class="container mx-auto p-4">
+    <nav class="flex justify-between items-center py-4">
+      <div class="text-center mx-auto text-4xl mb-10 mt-10 text-red-400 font-bold">.Choisissez la recette qui vous correspond.</div>
+      <button @click="isModalOpen = !isModalOpen" class="block md:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </nav>
+  
+    <div class="mb-4 flex justify-start items-center">
+      <select x-model="difficultyFilter" class="p-2 border rounded ml-0">
+        <option value="">Tous les niveaux</option>
+        <option value="facile" class="text-green-500 border-green-500">Facile</option>
+        <option value="moyenne" class="text-orange-500 border-orange-500">Moyen</option>
+        <option value="difficile" class="text-red-500 border-red-500">Difficile</option>
+      </select>
+      <p class="ml-4">
+        <span>Nombre de recettes : </span>
+        <span class="bg-red-400 text-white py-1 px-4 rounded-full" x-text="filteredRecipes() ? filteredRecipes().length : '0'"></span>
+      </p>
+    </div>
+  
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <template x-for="recipe in filteredRecipes()" :key="recipe.id">
+        <div class="card p-4 border rounded-lg shadow-lg flex flex-col justify-between h-full mb-8">
+          <img :src="recipe.imageUrl" :alt="recipe.title" class="w-full h-40 object-cover rounded mb-4">
+          <h3 class="text-lg font-bold text-red-400 mb-2 text-center" x-text="recipe.title"></h3>
+          <div class="flex justify-between items-center mb-4">
+            <p class="text-sm py-1 px-3 rounded text-white" :class="{
+              'bg-green-500': recipe.difficulty === 'facile',
+              'bg-orange-500': recipe.difficulty === 'moyenne',
+              'bg-red-500': recipe.difficulty === 'difficile'
+            }" x-text="'Difficulté: ' + recipe.difficulty"></p>
+            <p class="text-sm" x-text="'Temps de préparation: ' + recipe.preparationTime + ' min'"></p>
+          </div>
+          <button @click="showRecipeDetails(recipe)" class="mt-4 mx-auto py-2 px-6 bg-red-400 text-white font-bold text-sm uppercase rounded-full hover:bg-white hover:text-red-400 hover:border-2 hover:border-red-400 focus:outline-none">
+            Voir la recette
+          </button>
+        </div>
+      </template>
+    </div>
+  
+    <div x-show="isModalOpen" @click.away="closeModal" class="fixed inset-0 flex items-center justify-center bg-black/75 z-50">
+      <div class="bg-white p-6 rounded-lg max-w-lg w-full relative">
+        <button @click="closeModal" class="absolute top-2 right-2 bg-red-400 text-white text-3xl font-bold w-12 h-12 flex items-center justify-center rounded-full">
+          ×
+        </button>
+        <h2 class="text-2xl font-bold text-red-400 mb-4 text-center" x-text="selectedRecipe?.title"></h2>
+        <div class="flex justify-between items-center mb-4">
+          <p class="text-sm py-1 px-3 rounded text-white" :class="{
+            'bg-green-500': selectedRecipe?.difficulty === 'facile',
+            'bg-orange-500': selectedRecipe?.difficulty === 'moyenne',
+            'bg-red-500': selectedRecipe?.difficulty === 'difficile'
+          }" x-text="'Difficulté: ' + selectedRecipe?.difficulty"></p>
+          <p class="text-sm" x-text="'Temps de préparation: ' + selectedRecipe?.preparationTime + ' min'"></p>
+        </div>
+        <div class="flex space-x-8">
+          <div class="flex-1">
+            <h3 class="font-semibold mb-2">Ingrédients</h3>
+            <ul>
+              <template x-for="ingredient in selectedRecipe?.ingredients" :key="ingredient.name">
+                <li x-text="ingredient.quantity + ' ' + ingredient.unit + ' ' + ingredient.name"></li>
+              </template>
+            </ul>
+          </div>
+          <div class="border-l-2 border-gray-300 mx-4"></div>
+          <div class="flex-1">
+            <h3 class="font-semibold mt-4 mb-2">Instructions</h3>
+            <div x-show="stepIndex < selectedRecipe?.instructions.length" class="mb-4">
+              <p x-text="selectedRecipe?.instructions[stepIndex]"></p>
+              <div class="flex justify-between mt-2">
+                <button @click="prevStep()" :disabled="stepIndex === 0" class="px-4 py-2 rounded-full text-white disabled:opacity-50 bg-red-400 focus:outline-none">
+                  Précédent
+                </button>
+                <button @click="nextStep()" :disabled="stepIndex === selectedRecipe?.instructions.length - 1" class="px-4 py-2 rounded-full text-white disabled:opacity-50 bg-red-400 focus:outline-none">
+                  Suivant
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
